@@ -142,7 +142,7 @@ resource "aws_autoscaling_group" "demo" {
     "aws_eks_cluster.demo"
   ]
 }
-
+/*
 locals {
   config_map_aws_auth = <<CONFIGMAPAWSAUTH
 
@@ -165,3 +165,4 @@ CONFIGMAPAWSAUTH
 output "config_map_aws_auth" {
   value = "${local.config_map_aws_auth}"
 }
+*/

@@ -3,9 +3,10 @@
 
 provider "aws" {
   version = "~> 2.13"
-
   region = "eu-west-1"
 }
+
+
 
 #IAM role and policy 
 
@@ -76,8 +77,8 @@ resource "aws_eks_cluster" "demo" {
   enabled_cluster_log_types = ["api", "audit"]
 
   vpc_config {
-    endpoint_private_access = true
-    endpoint_public_access = false
+    endpoint_private_access = false
+    endpoint_public_access = true
     security_group_ids = ["${aws_security_group.demo-cluster.id}"]
     subnet_ids = ["${data.aws_subnet.subnetid_private_a.id}", "${data.aws_subnet.subnetid_private_b.id}"]
   }
