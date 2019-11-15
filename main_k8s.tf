@@ -1,3 +1,4 @@
+/*
 data "aws_eks_cluster" "example" {
   name       = "${var.cluster-name}"
   #depends_on = ["aws_eks_cluster.demo"]
@@ -15,11 +16,12 @@ data "external" "token" {
 }*/
 
 provider "kubernetes" {
-  host                   = "${data.aws_eks_cluster.example.endpoint}"
-  cluster_ca_certificate = "${base64decode(data.aws_eks_cluster.example.certificate_authority.0.data)}"
+  host                   = "${aws_eks_cluster.demo.endpoint}"
+  cluster_ca_certificate = "${base64decode(aws_eks_cluster.demo.certificate_authority.0.data)}"
+  load_config_file       = false
   #token                 = "${data.aws_eks_cluster_auth.example.token}"
   #token                 = "${data.external.token.result.token}"
-/*
+  /*
 #old method aws-iam-authenticator should be replaced by aws eks get-token
 exec {
     api_version = "client.authentication.k8s.io/v1alpha1"
@@ -28,12 +30,12 @@ exec {
   }*/
   exec {
     api_version = "client.authentication.k8s.io/v1alpha1"
-    args        = ["eks","get-token", "--cluster-name" ,"${data.aws_eks_cluster.example.name}"]
+    args        = ["eks", "get-token", "--cluster-name", "${aws_eks_cluster.demo.id}"]
     command     = "aws"
   }
 
 
-  load_config_file = false
+
   #version = "~> 1.5"
 }
 
@@ -44,19 +46,26 @@ resource "kubernetes_config_map" "aws_auth" {
   }
   data = {
     mapRoles = <<EOF
-- rolearn: ${aws_iam_role.demo-cluster.arn}
+- rolearn: ${aws_iam_role.demo-node.arn}
   username: system:node:{{EC2PrivateDNSName}}
   groups:
     - system:bootstrappers
     - system:nodes
 - rolearn: arn:aws:iam::465242977050:role/EC2InstanceRole-codepipeline
-  username: adminserver
+  username: eksadminserver
   groups:
-    -system:masters
+    - system:masters
+- rolearn: ${aws_iam_role.eks_admin_role.arn}
+  username: eksadminserver
+  groups:
+    - system:masters
 EOF
   }
   depends_on = [
-  "aws_eks_cluster.demo"]
+    "aws_eks_cluster.demo",
+    "aws_autoscaling_group.demo"
+  ]
+
 }
 
 /*

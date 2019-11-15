@@ -3,7 +3,7 @@
 
 provider "aws" {
   version = "~> 2.13"
-  region = "eu-west-1"
+  region  = "eu-west-1"
 }
 
 
@@ -11,7 +11,8 @@ provider "aws" {
 #IAM role and policy 
 
 resource "aws_iam_role" "demo-cluster" {
-  name = "terraform-eks-demo-cluster"
+  name                  = "terraform-eks-demo-cluster"
+  force_detach_policies = true
 
   assume_role_policy = <<POLICY
 {
@@ -74,6 +75,7 @@ resource "aws_security_group_rule" "demo-cluster-ingress-workstation-https" {
 resource "aws_eks_cluster" "demo" {
   name = "${var.cluster-name}"
   role_arn = "${aws_iam_role.demo-cluster.arn}"
+  version = "1.14"
   enabled_cluster_log_types = ["api", "audit"]
 
   vpc_config {
@@ -88,6 +90,9 @@ resource "aws_eks_cluster" "demo" {
     "aws_iam_role_policy_attachment.demo-cluster-AmazonEKSServicePolicy",
     "aws_cloudwatch_log_group.eks_log_group"
   ]
+  provisioner "local-exec" {
+    command = "echo sleep 60s to propagate all permissions; start-sleep 60"
+  }
 }
 
 resource "aws_cloudwatch_log_group" "eks_log_group" {
