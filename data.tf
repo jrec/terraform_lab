@@ -21,7 +21,8 @@ data "aws_subnet" "subnetid_private_b" {
   }
 }
 
-### retrieve aws eks-optimized ami 
+### retrieve aws eks-optimized ami with filter
+/*
 data "aws_ami" "eks-worker" {
   filter {
     name   = "name"
@@ -32,3 +33,4 @@ data "aws_ami" "eks-worker" {
   owners      = ["self"]
   #owners      = ["602401143452"] # Amazon EKS AMI Account ID
 }
+*/

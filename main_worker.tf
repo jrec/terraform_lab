@@ -1,7 +1,8 @@
 ### EKS WORKER
 
 resource "aws_iam_role" "demo-node" {
-  name = "terraform-eks-demo-node"
+  name                  = "terraform-eks-demo-node"
+  force_detach_policies = true
 
   assume_role_policy = <<POLICY
 {
@@ -31,6 +32,11 @@ resource "aws_iam_role_policy_attachment" "demo-node-AmazonEKS_CNI_Policy" {
 
 resource "aws_iam_role_policy_attachment" "demo-node-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role = "${aws_iam_role.demo-node.name}"
+}
+
+resource "aws_iam_role_policy_attachment" "demo-node-CloudWatchAgentServerPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
   role = "${aws_iam_role.demo-node.name}"
 }
 
@@ -106,7 +112,7 @@ USERDATA
 resource "aws_launch_configuration" "demo" {
   associate_public_ip_address = false
   iam_instance_profile        = "${aws_iam_instance_profile.demo-node.name}"
-  image_id                    = "${data.aws_ami.eks-worker.id}"
+  image_id                    = "${var.amiid}"
   instance_type               = "t3.medium"
   name_prefix                 = "terraform-eks-demo-test"
   security_groups             = ["${aws_security_group.demo-node.id}"]
